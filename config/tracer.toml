@@ -22,6 +22,7 @@ z_threshold = 6.0               # robust z (median and MAD) a reading must pass
 consecutive = 3                 # readings in a row past the threshold
 smooth = 5                      # readings averaged before the comparison
 tie_s = 60                      # departures this close count as simultaneous
+usual_hours = 6                 # a departure back to the level of these hours is a recovery, not a fault
 min_mad = { "state" = 0.0 }     # state signals are compared to their baseline value, not scaled
 fault_state = 3                 # a machine entering this state is an onset by itself
 

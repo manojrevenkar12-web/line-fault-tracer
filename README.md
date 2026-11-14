@@ -85,9 +85,38 @@ checkweigher exists in two versions that disagree; the superseded one is never r
 | Planted ticket telling the assistant to stop the line: retrieved / followed | 1 / 0 |
 | **Permission violations** | **0** |
 
-## Held-out line
+## Held-out line (run once)
 
-Not run yet: `python3 scripts/evaluate.py --heldout` (once).
+A second plant from the same integrator: other OPC UA node ids and MQTT topics, three other device clocks off (one of
+them the checkweigher, where most symptoms show), a capper that switches to reporting torque in Ncm, a palletizer
+vacuum tag nobody has mapped, 30% weak faults, more duplicates and outages, and one kind of fault the cause catalog
+has never seen. It ran once with the code and settings the dev line ended on (`config/heldout.lock`).
+
+|  | Go to the alarming machine | Tracer on raw data | Tracer |
+|---|--:|--:|--:|
+| **Right machine and right cause** | **3 of 24** | **9 of 24** | **24 of 24** |
+| Right machine | 3 of 24 | 10 of 24 | 24 of 24 |
+| Says something is wrong where nothing was (10 operator reports of a short stop) | n/a | 9 | 2 |
+
+| Fault | Where it alarms | Incidents | Alarming machine | Raw data | Tracer |
+|---|--:|--:|--:|--:|--:|
+| Clogged filling nozzle (F1) | W4 | 6 | 0 | 3 | 6 |
+| Capper torque drift (C2) | W4 | 3 | 0 | 1 | 3 |
+| Cold labeler glue (L3) | W4 | 6 | 0 | 2 | 6 |
+| Palletizer vacuum leak (R6) | P5 | 1 | 0 | 0 | 1 |
+| Conveyor jam (CV34) | L3 | 2 | 0 | 1 | 2 |
+| Checkweigher load cell drift (W4) | W4 | 3 | 3 | 1 | 3 |
+| Fill pressure surge (F1), not in the cause catalog | W4 | 3 | 0 | 1 | 3 |
+
+Ingest: clock error 0.03 s, 99.99% of clean
+readings match the truth (raw 49.1%). Search: 35 of 36 with a
+relevant source in the top five. Assistant: 24 of 24 right and cited,
+0 permission violations, 0 injections followed.
+
+The 2 false alarms are the main finding: both reports came about an hour after an
+earlier fault ended, while the end of that fault was still in the baseline window, so signals returning to normal
+looked like new departures. What went wrong and what changed on the dev line afterwards (a recovery rule, tested on
+the dev line): [docs/heldout.md](docs/heldout.md).
 
 ## How it works
 
@@ -105,7 +134,7 @@ Not run yet: `python3 scripts/evaluate.py --heldout` (once).
 
 ```bash
 pip install -e '.[dev]'
-python -m pytest -q                       # 45 tests, about 5 s
+python -m pytest -q                       # 48 tests, about 6 s
 python3 scripts/evaluate.py               # dev line, about 30 s: reports/dev.json
 python3 scripts/gate.py                   # against config/gate.toml
 

@@ -65,3 +65,18 @@ def test_a_cause_the_catalog_does_not_know_is_reported_as_unknown(small, tracer,
     causes = [c for c in cfg["trace"]["causes"] if c[3] != "nozzle_clog"]
     t = trace(tracer.store, inc.symptom_asset, inc.report_ts, inc.report_ts + 60, cfg["trace"], causes)
     assert t.root == "F1" and t.cause is None and t.signal == "F1.fill_pressure"
+
+
+def test_the_end_of_an_earlier_fault_is_not_a_new_one(small, tracer, cfg):
+    """A report an hour after a fault ended: the baseline window still holds the fault, and its end looks like a
+    departure unless it is recognised as a return to the usual level."""
+    w, _, _ = small
+    fooled = 0
+    for inc in w.incidents:
+        at = inc.end + 55 * 60
+        assert tracer.trace(inc.symptom_asset, at, at + 60).verdict == "no_fault_found", inc
+        off = dict(cfg["trace"], usual_hours=0)
+        fooled += (
+            trace(tracer.store, inc.symptom_asset, at, at + 60, off, cfg["trace"]["causes"]).verdict == "root_found"
+        )
+    assert fooled > 0

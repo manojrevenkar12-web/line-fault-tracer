@@ -98,9 +98,25 @@ def onsets_for(store: Store, asset: str, report_ts: float, as_of: float, cfg: di
         _, base = store.series(sig, report_ts - b0 * 60, report_ts - b1 * 60, as_of)
         ts, v = store.series(sig, report_ts - cfg["scan_from_min"] * 60, as_of + 1, as_of)
         hit = first_departure(ts, v, base, cfg, unit == "state")
+        if hit and unit != "state" and recovering(store, sig, base, v[ts >= hit[0]], report_ts, as_of, cfg):
+            continue
         if hit:
             out.append(Onset(asset, sig, hit[0], hit[1], hit[2]))
     return out
+
+
+def recovering(
+    store: Store, sig: str, base: np.ndarray, after: np.ndarray, report_ts: float, as_of: float, cfg: dict
+) -> bool:
+    """The baseline window was itself off the signal's usual level (an earlier fault was still going on) and the
+    departure moves back towards that level: the end of the earlier fault, not a new one."""
+    _, usual = store.series(sig, report_ts - cfg["usual_hours"] * 3600, report_ts - cfg["baseline_min"][1] * 60, as_of)
+    if len(usual) < 20 or not len(after):
+        return False
+    med = float(np.median(usual))
+    mad = max(1.4826 * float(np.median(np.abs(usual - med))), 1e-6)
+    off = abs(float(np.median(base)) - med)
+    return off > cfg["z_threshold"] * mad and abs(float(np.median(after)) - med) < off
 
 
 def trace(store: Store, symptom: str, report_ts: float, as_of: float, cfg: dict, causes: list[list]) -> Trace:

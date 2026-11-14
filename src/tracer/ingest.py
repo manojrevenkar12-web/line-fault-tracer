@@ -77,16 +77,25 @@ def ingest(store: Store, streams: dict[str, list[dict]], cfg: dict, units: dict,
     sentinels = set(cfg["sentinels"])
     best: dict[tuple[str, float], list] = {}
     unknown: dict[str, list] = {}
+    seen_tags: set[str] = set()
 
     def take(tag: str, ts: float, value: float, unit: str | None, recv: float) -> None:
         counts["messages"] += 1
         sig = alias.get(tag)
         if sig is None:
-            u = unknown.setdefault(tag, [0, recv])
-            u[0] += 1
+            u = unknown.setdefault(tag, [0, recv, set()])
+            key = round(round(ts / res) * res, 3)
+            if key in u[2]:
+                counts["duplicates"] += 1
+            else:
+                u[2].add(key)
+                u[0] += 1
+                counts["quarantined"] += 1
+            if value in sentinels:
+                counts["quarantined_sentinels"] += 1
             u[1] = min(u[1], recv)
-            counts["quarantined"] += 1
             return
+        seen_tags.add(tag)
         asset = sig.split(".")[0]
         ts = ts - applied.get(asset, 0.0)
         canonical, lo, hi = meta[sig]
@@ -112,10 +121,11 @@ def ingest(store: Store, streams: dict[str, list[dict]], cfg: dict, units: dict,
         p = m["payload"]
         take(m["topic"], p["ts"], p["v"], p.get("u"), m["recv_ts"])
 
-    known = dict(alias)
+    # only tags that delivered data count as taken: an approval from another plant must not block a suggestion here
+    known = {t: sig for t, sig in alias.items() if t in seen_tags}
     db.executemany(
         "INSERT OR REPLACE INTO quarantine VALUES (?, ?, ?, ?)",
-        [(t, n, first, suggest(t, known, sorted(meta))) for t, (n, first) in sorted(unknown.items())],
+        [(t, n, first, suggest(t, known, sorted(meta))) for t, (n, first, _) in sorted(unknown.items())],
     )
 
     by_signal: dict[str, list] = defaultdict(list)

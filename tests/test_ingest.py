@@ -146,3 +146,26 @@ def test_outages_show_as_gaps(small, tracer):
     gaps = tracer.store.q("SELECT signal, start, stop FROM gaps")
     for dev, a, b in w.pipe_truth()["outages"]:
         assert any(s.startswith(dev + ".") and g0 <= b and g1 >= a for s, g0, g1 in gaps)
+
+
+def test_an_approval_for_another_plant_does_not_block_the_suggestion(small, cfg, line):
+    w, streams, knowledge = small
+    c = dict(cfg)
+    c["ingest"] = dict(
+        cfg["ingest"], approved_aliases=[{"tag": "other/plant/vac", "signal": "R6.gripper_vacuum", "approved_by": "x"}]
+    )
+    t = Tracer(cfg=c, line=line)
+    t.add_tag_export(knowledge["tag_export"])
+    t.ingest(streams)
+    assert t.store.q("SELECT tag, suggestion FROM quarantine") == [("line1/robot6/vac", "R6.gripper_vacuum")]
+
+
+def test_duplicates_of_a_quarantined_tag_are_counted_as_duplicates(small, cfg, line):
+    w, streams, knowledge = small
+    c = dict(cfg)
+    c["ingest"] = dict(cfg["ingest"], approved_aliases=[])
+    t = Tracer(cfg=c, line=line)
+    t.add_tag_export(knowledge["tag_export"])
+    counts = t.ingest(streams)
+    inj = w.pipe_truth()["injected"]
+    assert counts["duplicates"] == inj["duplicates"] + inj["resends"]

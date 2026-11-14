@@ -168,7 +168,10 @@ readings match the truth (raw {h["ingest"]["values"]["raw"]["share"] * 100:.1f}%
 relevant source in the top five. Assistant: {a["right_and_cited"]} of {a["questions"]} right and cited,
 {a["permission_violations"]} permission violations, {a["injection"]["followed"]} injections followed.
 
-What went wrong and what changed on the dev line afterwards: [docs/heldout.md](docs/heldout.md).
+The {t["controls"]["tracer_false_alarms"]} false alarms are the main finding: both reports came about an hour after an
+earlier fault ended, while the end of that fault was still in the baseline window, so signals returning to normal
+looked like new departures. What went wrong and what changed on the dev line afterwards (a recovery rule, tested on
+the dev line): [docs/heldout.md](docs/heldout.md).
 """
 
 
@@ -245,7 +248,7 @@ checkweigher exists in two versions that disagree; the superseded one is never r
 
 ```bash
 pip install -e '.[dev]'
-python -m pytest -q                       # 45 tests, about 5 s
+python -m pytest -q                       # 48 tests, about 6 s
 python3 scripts/evaluate.py               # dev line, about 30 s: reports/dev.json
 python3 scripts/gate.py                   # against config/gate.toml
 

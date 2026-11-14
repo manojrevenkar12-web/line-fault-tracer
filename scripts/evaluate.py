@@ -80,7 +80,8 @@ def ingest_score(w: World, clean: Tracer, raw: Tracer, counts: dict, raw_counts:
         "duplicates": {"injected": inj["duplicates"] + inj["resends"], "removed": counts.get("duplicates", 0)},
         "sentinels": {
             "injected": inj["sentinels"],
-            "caught": int(clean.store.one("SELECT count(*) FROM samples WHERE quality = 'invalid:sentinel'")),
+            "caught": int(clean.store.one("SELECT count(*) FROM samples WHERE quality = 'invalid:sentinel'"))
+            + counts.get("quarantined_sentinels", 0),
         },
         "clock": {
             d: {"true_s": true_off[d], "estimated_s": r(est[d], 2), "error_s": r(abs(est[d] - true_off[d]), 2)}
