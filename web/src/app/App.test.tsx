@@ -1,12 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import raw from "../../public/data/console.json";
 import type { Console } from "../shared/types";
 import { App } from "./App";
 
-const data: Console = JSON.parse(readFileSync(resolve(__dirname, "../../public/data/console.json"), "utf8"));
+const data = raw as unknown as Console;
 
 function mount() {
   return render(
