@@ -1,0 +1,27 @@
+[project]
+name = "line-fault-tracer"
+version = "0.1.0"
+description = "Root cause on a packaging line from messy OPC UA and MQTT data, a plant knowledge graph and a permissioned shop-floor assistant, measured on a simulated line"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26", "scikit-learn>=1.4", "fastapi>=0.110", "httpx>=0.27"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6", "hypothesis>=6"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "scripts"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]

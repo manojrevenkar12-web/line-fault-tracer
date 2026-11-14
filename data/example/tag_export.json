@@ -1,0 +1,92 @@
+[
+ {
+  "tag": "ns=2;s=Filler01.Speed",
+  "signal": "F1.speed",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "ns=2;s=Filler01.FillPressure",
+  "signal": "F1.fill_pressure",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "ns=2;s=Filler01.MachineState",
+  "signal": "F1.state",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "ns=2;s=Capper.SpeedAct",
+  "signal": "C2.speed",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "ns=2;s=Capper.TorqueAct",
+  "signal": "C2.torque",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "ns=2;s=Capper.State",
+  "signal": "C2.state",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "ns=2;s=Labeler.Speed",
+  "signal": "L3.speed",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "ns=2;s=Labeler.GlueTemp",
+  "signal": "L3.glue_temp",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "ns=2;s=Labeler.LabelOffset",
+  "signal": "L3.label_offset",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "ns=2;s=Labeler.State",
+  "signal": "L3.state",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "line1/cv34/current",
+  "signal": "CV34.motor_current",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "line1/cw4/weight",
+  "signal": "W4.weight",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "line1/cw4/rejects",
+  "signal": "W4.reject_rate",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "line1/cw4/state",
+  "signal": "W4.state",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "line1/cp5/speed",
+  "signal": "P5.speed",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "line1/cp5/state",
+  "signal": "P5.state",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "line1/robot6/cycle",
+  "signal": "R6.cycle_time",
+  "source": "PLC tag export 2026-09"
+ },
+ {
+  "tag": "line1/robot6/state",
+  "signal": "R6.state",
+  "source": "PLC tag export 2026-09"
+ }
+]

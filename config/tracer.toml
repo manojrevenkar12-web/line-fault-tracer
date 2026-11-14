@@ -1,0 +1,89 @@
+# The tracer's own settings. Nothing here comes from the world; every number is a choice made on the dev line.
+
+[ingest]
+expected_latency_s = 0.3        # network latency assumed when a device clock is estimated from heartbeats
+min_clock_offset_s = 2.0        # offsets smaller than this are left alone (NTP-level noise)
+dedupe_resolution_s = 0.5       # two samples of one signal closer than this are the same sample
+late_after_s = 120              # a sample received this long after it was taken came from a buffer flush
+stuck_samples = 20              # identical non-zero readings in a row before a sensor counts as frozen
+gap_factor = 3                  # a gap is a pause longer than this many sample intervals
+sentinels = [-9999.0, -32768.0, 65535.0]
+
+# Tags the PLC export does not list. Quarantined until a person maps them; these mappings were approved.
+[[ingest.approved_aliases]]
+tag = "line1/robot6/vac"
+signal = "R6.gripper_vacuum"
+approved_by = "maintenance lead, after the quarantine report of 2026-11-02"
+
+[trace]
+baseline_min = [95, 50]         # minutes before the report: the window that defines normal
+scan_from_min = 50              # look for the first abnormal reading from this many minutes before the report
+z_threshold = 6.0               # robust z (median and MAD) a reading must pass
+consecutive = 3                 # readings in a row past the threshold
+smooth = 5                      # readings averaged before the comparison
+tie_s = 60                      # departures this close count as simultaneous
+min_mad = { "state" = 0.0 }     # state signals are compared to their baseline value, not scaled
+fault_state = 3                 # a machine entering this state is an onset by itself
+
+# What a first abnormal signal at the root means. [asset, signal, direction, cause, action]
+causes = [
+  ["F1", "F1.fill_pressure", "down", "nozzle_clog", "Clean the filling nozzles and check the product valve"],
+  ["C2", "C2.torque", "down", "torque_drift", "Check the capper clutch pads and the torque setpoint"],
+  ["L3", "L3.glue_temp", "down", "glue_cold", "Check the glue roller heater cartridge and thermostat"],
+  ["L3", "L3.label_offset", "up", "glue_cold", "Check the glue roller heater cartridge and thermostat"],
+  ["R6", "R6.gripper_vacuum", "up", "gripper_leak", "Replace the suction cups and check the vacuum hoses"],
+  ["R6", "R6.state", "up", "gripper_leak", "Replace the suction cups and check the vacuum hoses"],
+  ["CV34", "CV34.motor_current", "up", "conveyor_jam", "Clear the jam on the conveyor before the checkweigher"],
+  ["W4", "W4.weight", "up", "loadcell_drift", "Recalibrate the load cell with the reference weight"],
+]
+
+[search]
+k = 5
+rrf_k = 60
+bm25_k1 = 1.4
+bm25_b = 0.75
+ngram = [3, 5]
+
+# Words people use for machines and parts, mapped to the plant's names. Identifiers decide; these only propose.
+[search.glossary]
+abfueller = "filler F1"
+fueller = "filler F1"
+duese = "nozzle"
+duesen = "nozzle"
+fuellventil = "nozzle valve"
+druck = "pressure"
+untergewicht = "underweight"
+uebergewicht = "overweight"
+verschliesser = "capper C2"
+deckel = "caps"
+drehmoment = "torque"
+kupplung = "clutch"
+etikettierer = "labeler L3"
+labeller = "labeler L3"
+etiketten = "labels"
+etikett = "label"
+leim = "glue"
+kalt = "cold"
+heizpatrone = "heater cartridge"
+waage = "checkweigher W4"
+scale = "checkweigher W4"
+kalibrieren = "calibrate"
+band = "conveyor CV34"
+transportband = "conveyor CV34"
+stau = "jam"
+blockiert = "blocked"
+roboter = "palletizer R6"
+palletiser = "palletizer R6"
+robot = "palletizer R6"
+greifer = "gripper"
+vakuum = "vacuum"
+saugnapf = "suction cup"
+packer = "case packer P5"
+
+[agent]
+roles = { operator = ["get_line_state", "trace_root_cause", "search_knowledge", "get_signal"], maintenance_lead = ["get_line_state", "trace_root_cause", "search_knowledge", "get_signal", "open_ticket"] }
+cite = 3                        # knowledge sources quoted with each answer
+
+[llm]
+model = "claude-sonnet-5-5"
+max_tokens = 400

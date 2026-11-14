@@ -1,0 +1,126 @@
+# The line as commissioned: assets, material flow and the signal catalog with units and plausible ranges.
+# This is plant documentation, known to everyone; the world and the tracer both read it.
+
+# material flows along this order
+flow = ["F1", "C2", "L3", "CV34", "W4", "P5", "R6"]
+
+[[assets]]
+id = "F1"
+type = "filler"
+name = "Filler"
+[[assets]]
+id = "C2"
+type = "capper"
+name = "Capper"
+[[assets]]
+id = "L3"
+type = "labeler"
+name = "Labeler"
+[[assets]]
+id = "CV34"
+type = "conveyor"
+name = "Conveyor labeler to checkweigher"
+[[assets]]
+id = "W4"
+type = "checkweigher"
+name = "Checkweigher with cap and label inspection"
+[[assets]]
+id = "P5"
+type = "case_packer"
+name = "Case packer"
+[[assets]]
+id = "R6"
+type = "palletizer"
+name = "Palletizing robot"
+
+# canonical signal id, unit, plausible range (values outside are rejected as invalid)
+[[signals]]
+id = "F1.speed"
+unit = "bpm"
+range = [0, 450]
+[[signals]]
+id = "F1.fill_pressure"
+unit = "bar"
+range = [0, 6]
+[[signals]]
+id = "C2.speed"
+unit = "bpm"
+range = [0, 450]
+[[signals]]
+id = "C2.torque"
+unit = "Nm"
+range = [0, 6]
+[[signals]]
+id = "L3.speed"
+unit = "bpm"
+range = [0, 450]
+[[signals]]
+id = "L3.glue_temp"
+unit = "degC"
+range = [80, 220]
+[[signals]]
+id = "L3.label_offset"
+unit = "mm"
+range = [-8, 8]
+[[signals]]
+id = "CV34.motor_current"
+unit = "A"
+range = [0, 25]
+[[signals]]
+id = "W4.weight"
+unit = "g"
+range = [400, 600]
+[[signals]]
+id = "W4.reject_rate"
+unit = "pct"
+range = [0, 100]
+[[signals]]
+id = "P5.speed"
+unit = "cpm"
+range = [0, 40]
+[[signals]]
+id = "R6.cycle_time"
+unit = "s"
+range = [0, 40]
+[[signals]]
+id = "R6.gripper_vacuum"
+unit = "kPa"
+range = [-95, 0]
+[[signals]]
+id = "F1.state"
+unit = "state"
+range = [0, 4]
+[[signals]]
+id = "C2.state"
+unit = "state"
+range = [0, 4]
+[[signals]]
+id = "L3.state"
+unit = "state"
+range = [0, 4]
+[[signals]]
+id = "W4.state"
+unit = "state"
+range = [0, 4]
+[[signals]]
+id = "P5.state"
+unit = "state"
+range = [0, 4]
+[[signals]]
+id = "R6.state"
+unit = "state"
+range = [0, 4]
+
+# state codes all machines use
+[states]
+running = 0
+starved = 1
+blocked = 2
+fault = 3
+stopped = 4
+
+# unit conversions the plant's devices are known to use
+[units]
+degF = { to = "degC", scale = 0.5555556, offset = -17.7777778 }
+Ncm = { to = "Nm", scale = 0.01, offset = 0.0 }
+psi = { to = "bar", scale = 0.0689476, offset = 0.0 }

@@ -1,0 +1,37 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - run: pip install -e '.[dev]'
+      - run: ruff check . && ruff format --check .
+      - run: python -m pytest -q
+      - name: The evaluation reproduces the committed report
+        run: |
+          python scripts/evaluate.py
+          git diff --exit-code reports/dev.json
+      - name: Quality gate
+        run: python scripts/gate.py
+      - name: README and console data match the reports
+        run: |
+          python scripts/readme.py
+          git diff --exit-code README.md web/public/data/console.json
+      - name: The command line runs on the example files
+        run: |
+          python -m tracer load data/example --db /tmp/line.db
+          python -m tracer ask --db /tmp/line.db --role operator --at 1793535493 "Underweight rejects high on W4 (W4-A17), why?" | grep -q "F1"
+          python -m tracer search --db /tmp/line.db "Greifervakuum zu niedrig"
+  web:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: web } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm, cache-dependency-path: web/package-lock.json }
+      - run: npm ci
+      - run: npm run build
+      - run: npm test

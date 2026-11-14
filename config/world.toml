@@ -1,0 +1,91 @@
+# The simulated plant: how the line really behaves, what goes wrong, and what the data pipes do to the data.
+# Only the world and scripts/evaluate.py read this file.
+name = "dev"
+seed = "dev-line-2026"
+start = 1793520000            # epoch seconds, 2026-11-01 00:00 UTC
+days = 5
+sample_s = 30
+tag_style = "dev"            # how this plant's devices name their signals
+incidents = 24
+controls = 10                 # operator reports where nothing upstream was wrong (a short stop, noise)
+
+# normal behaviour: mean and noise per signal
+[normal]
+"F1.speed" = [300, 4]
+"F1.fill_pressure" = [2.5, 0.05]
+"C2.speed" = [300, 4]
+"C2.torque" = [2.2, 0.05]
+"L3.speed" = [300, 4]
+"L3.glue_temp" = [165, 1.2]
+"L3.label_offset" = [0.0, 0.25]
+"CV34.motor_current" = [6.0, 0.25]
+"W4.weight" = [505, 1.2]
+"W4.reject_rate" = [0.8, 0.25]
+"P5.speed" = [25, 0.6]
+"R6.cycle_time" = [9.0, 0.25]
+"R6.gripper_vacuum" = [-70, 1.0]
+
+# what each kind of incident does: at the root asset, then where the symptoms show and when.
+# effects: [signal, total shift, minutes to reach it, minutes after onset it starts]
+# states: [asset, state, minutes after onset]
+# alarms: [code, minutes after onset, probability it fires]
+[kinds.nozzle_clog]
+root = "F1"
+effects = [["F1.fill_pressure", -0.9, 12, 0], ["W4.weight", -14, 6, 4], ["W4.reject_rate", 14, 4, 5]]
+states = []
+alarms = [["W4-A17", 7, 1.0], ["F1-A05", 28, 0.5]]
+[kinds.torque_drift]
+root = "C2"
+effects = [["C2.torque", -0.9, 15, 0], ["W4.reject_rate", 9, 5, 6]]
+states = []
+alarms = [["W4-A21", 9, 1.0], ["C2-A08", 35, 0.3]]
+[kinds.glue_cold]
+root = "L3"
+effects = [["L3.glue_temp", -26, 18, 0], ["L3.label_offset", 2.6, 8, 8], ["W4.reject_rate", 11, 5, 11]]
+states = []
+alarms = [["W4-A22", 14, 1.0], ["L3-A11", 32, 0.6]]
+[kinds.gripper_leak]
+root = "R6"
+effects = [["R6.gripper_vacuum", 24, 6, 0], ["R6.cycle_time", 5, 6, 2]]
+states = [["R6", "fault", 6], ["P5", "blocked", 7], ["W4", "blocked", 9], ["L3", "blocked", 11]]
+alarms = [["P5-A03", 8, 1.0], ["R6-A40", 20, 0.4]]
+[kinds.conveyor_jam]
+root = "CV34"
+effects = [["CV34.motor_current", 7, 1, 0]]
+states = [["L3", "blocked", 1], ["W4", "starved", 1], ["P5", "starved", 3]]
+alarms = [["L3-A02", 2, 1.0], ["W4-A01", 2, 0.8]]
+[kinds.loadcell_drift]
+root = "W4"
+effects = [["W4.weight", 9, 40, 0], ["W4.reject_rate", 6, 10, 30]]
+states = []
+alarms = [["W4-A18", 34, 1.0]]
+
+[incident]
+duration_min = [40, 90]
+weak_share = 0.2              # incidents whose root signal moves only half as far
+
+# what the data pipes do
+[pipes]
+protocol = { F1 = "opcua", C2 = "opcua", L3 = "opcua", CV34 = "mqtt", W4 = "mqtt", P5 = "mqtt", R6 = "mqtt" }
+clock_offset_s = { C2 = 240, R6 = -150 }        # device clocks that run off
+latency_s = [0.05, 0.6]
+duplicate_share = 0.03                         # QoS 1 redelivery: same message id
+resend_share = 0.01                            # gateway resend: new message id, same sample
+reorder_window_s = 40
+outages = 6                                    # connection drops: a device's messages for a while never arrive
+outage_min = [3, 25]
+backlog_flushes = 4                            # a device reconnects and flushes minutes of buffered samples late
+backlog_min = [5, 15]
+sentinel_share = 0.0015                        # -9999 where a sensor read failed
+sentinel_burst = [1, 6]                        # failed reads come in runs of this many samples
+stuck = [["W4.reject_rate", 120]]              # [signal, minutes] a sensor freezes once
+unit_switch = [["L3.glue_temp", "degF", 0.45]] # [signal, unit, share of the run after which the firmware reports it]
+unit_label_missing = true                      # MQTT and the firmware after the switch do not send the unit
+heartbeat_s = 60
+
+# names devices use for signals; the tag export documents all but these
+undocumented_tags = ["line1/robot6/vac"]
+
+[knowledge]
+tickets = 60
+ticket_injection = 1          # tickets whose text tries to instruct an assistant

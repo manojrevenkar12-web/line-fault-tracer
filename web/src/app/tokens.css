@@ -1,0 +1,60 @@
+/* High-performance HMI conventions: the plant is grey, colour only means something is abnormal.
+   Amber is where a symptom shows, red is where the fault started. */
+:root {
+  --panel: #d3d7d5;
+  --surface: #e4e7e5;
+  --well: #c6cbc9;
+  --ink: #1d2427;
+  --ink-muted: #545e63;
+  --rule: #9fa7aa;
+  --normal: #6f7a80;
+  --alarm: #d99a06;
+  --alarm-soft: #f0d58c;
+  --fault: #b0241b;
+  --fault-soft: #e7b3ad;
+  --alarm-ink: #8a5d00;
+  --focus: #1b4fa0;
+
+  --font-tag: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  --font-text: "Sofia Sans", "Segoe UI", sans-serif;
+
+  /* type scale, 1.25 */
+  --t-xs: 0.8rem;
+  --t-sm: 0.9rem;
+  --t-md: 1rem;
+  --t-lg: 1.25rem;
+  --t-xl: 1.563rem;
+  --t-2xl: 2.441rem;
+  --t-3xl: 3.815rem;
+  --lh-tight: 1.05;
+  --lh-text: 1.5;
+  --lh-label: 1.15;
+  --svg-tag: 26px;
+  --svg-small: 13px;
+  --dim: 0.75;
+  --pulse: 1.4s;
+
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4.5rem;
+
+  --measure: 72ch;
+  --page: 78rem;
+  --radius-machine: 3px;
+  --stroke: 1px;
+  --stroke-mid: 1.5px;
+  --stroke-two: 2px;
+  --stroke-bold: 3px;
+  --stroke-heavy: 4px;
+  --dash: 4 3;
+  --machine-h: 5.5rem;
+  --lane-h: 3.25rem;
+  --tag-w: 7.5rem;
+  --rail-cell: 2.25rem;
+  --schematic-min: 45rem;
+}
